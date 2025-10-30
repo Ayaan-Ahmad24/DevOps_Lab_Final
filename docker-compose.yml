@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./backend
+    container_name: irtazafoods-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    networks:
+      - mern-network
+
+  frontend:
+    build: ./frontend
+    container_name: irtazafoods-frontend
+    ports:
+      - "3000:80"   # host:container
+    stdin_open: true
+    tty: true
+    networks:
+      - mern-network
+    depends_on:
+      - backend
+
+networks:
+  mern-network:
+    driver: bridge

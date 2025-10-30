@@ -18,4 +18,5 @@ Usage
 See `docker-compose.yml` for how to run the frontend and backend together using Docker.
 
 ---
+
 Updated merge to combine project README and DevOps lab description.

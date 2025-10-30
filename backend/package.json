@@ -1,4 +1,11 @@
 {
+  "name": "mern-backend",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
   "dependencies": {
     "async-handler": "^0.0.3",
     "bcrypt": "^5.1.1",
