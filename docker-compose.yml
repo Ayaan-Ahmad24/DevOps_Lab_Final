@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Database (built from local Dockerfile)
+  mongo-db:
+    build: ./db
+    container_name: irtazafoods-db
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mern-network
+
+  # Backend (Updated for .env)
+  backend:
+    build: ./backend
+    container_name: irtazafoods-backend
+    ports:
+      - "5000:5000"
+    
+    # 1. Load variables from your file
+    env_file:
+      - ./backend/.env
+    
+    # 2. OVERRIDE specific variables for Docker networking
+    environment:
+      # This overwrites the URI in your file to use the Docker service name
+      - MONGO_URI=mongodb://mongo-db:27017/irtazafoods
+      - PORT=5000
+      
+    depends_on:
+      - mongo-db
+    networks:
+      - mern-network
+
+  # Frontend (Updated for .env)
+  frontend:
+    build: ./frontend
+    container_name: irtazafoods-frontend
+    ports:
+      - "5173:80"
+    # Note: Vite loads .env variables at BUILD time. 
+    # Ensure your .env is inside the frontend folder before building.
+    depends_on:
+      - backend
+    networks:
+      - mern-network
+
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge

@@ -45,7 +45,7 @@ const MenuPage = () => {
     const productLink = `${import.meta.env.VITE_API_URL}/product/${itemId}`; // Adjust based on your product page URL
     const message = `Hey, I want to order this ${itemName}. You can check it out here: ${productLink}`;
     const encodedMessage = encodeURIComponent(message); // Ensure message is properly encoded
-    const whatsappUrl = `https://wa.me/923219792864?text=${encodedMessage}`; // Replace with admin/owner's WhatsApp number
+    const whatsappUrl = `https://wa.me/923097011748?text=${encodedMessage}`; // Replace with admin/owner's WhatsApp number
     console.log(encodedMessage);
 
     // Open WhatsApp chat with the encoded message

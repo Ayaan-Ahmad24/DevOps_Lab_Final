@@ -1,0 +1,81 @@
+---
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: irtazafoods-db
+  namespace: irtazafoods
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: irtazafoods-db
+  template:
+    metadata:
+      labels:
+        app: irtazafoods-db
+    spec:
+      containers:
+      - name: mongo
+        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-mongo-db:latest
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+      volumes:
+      - name: mongo-data
+        persistentVolumeClaim:
+          claimName: mongo-pvc
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: irtazafoods-backend
+  namespace: irtazafoods
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: irtazafoods-backend
+  template:
+    metadata:
+      labels:
+        app: irtazafoods-backend
+    spec:
+      containers:
+      - name: backend
+        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-backend:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGO_URI
+          value: "mongodb://irtazafoods-db:27017/irtazafoods"
+        - name: PORT
+          value: "5000"
+        - name: FRONTEND_URL
+          value: "http://irtazafoods-frontend"
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: irtazafoods-frontend
+  namespace: irtazafoods
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: irtazafoods-frontend
+  template:
+    metadata:
+      labels:
+        app: irtazafoods-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-frontend:latest
+        ports:
+        - containerPort: 80
+

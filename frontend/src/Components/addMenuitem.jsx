@@ -27,7 +27,7 @@ const AddMenuItemPage = () => {
       );
 
       alert("Menu item added successfully");
-      navigate("/menulist");
+      // Removed automatic redirect to /menulist after adding item
     } catch (error) {
       console.error("Error adding menu item:", error);
 

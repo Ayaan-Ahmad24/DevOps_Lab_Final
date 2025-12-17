@@ -9,7 +9,7 @@ import {
   FaYoutube,
   FaTiktok,
 } from "react-icons/fa";
-import '../index.css';
+import "../index.css";
 
 const Footer = () => {
   // Updated coordinates
@@ -17,25 +17,30 @@ const Footer = () => {
   const longitude = 74.316587;
 
   const openGoogleMaps = () => {
-    window.open(`https://www.google.com/maps?q=${latitude},${longitude}`, '_blank');
+    window.open(
+      `https://www.google.com/maps?q=${latitude},${longitude}`,
+      "_blank"
+    );
   };
 
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const message = formData.get('message');
-    
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const message = formData.get("message");
+
     const encodedName = encodeURIComponent(name);
     const encodedEmail = encodeURIComponent(email);
     const encodedMessage = encodeURIComponent(message);
 
     const whatsappMessage = `Name: ${encodedName}\nEmail: ${encodedEmail}\nMessage: ${encodedMessage}`;
-    const whatsappUrl = `https://wa.me/923219792864?text=${encodeURIComponent(whatsappMessage)}`;
+    const whatsappUrl = `https://wa.me/923097011748?text=${encodeURIComponent(
+      whatsappMessage
+    )}`;
 
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -46,13 +51,28 @@ const Footer = () => {
           <h3 className="text-2xl font-bold mb-8 text-white">Quick Links</h3>
           <ul className="space-y-4">
             <li>
-              <a href="https://chat.whatsapp.com/Et14mrO6ysA0zlP8G4qpsK" className="hover:text-gray-300 transition-colors duration-300 text-white text-lg">Community</a>
+              <a
+                href="https://chat.whatsapp.com/Et14mrO6ysA0zlP8G4qpsK"
+                className="hover:text-gray-300 transition-colors duration-300 text-white text-lg"
+              >
+                Community
+              </a>
             </li>
             <li>
-              <a href="/menu" className="hover:text-gray-300 transition-colors duration-300 text-white text-lg">Menu</a>
+              <a
+                href="/menu"
+                className="hover:text-gray-300 transition-colors duration-300 text-white text-lg"
+              >
+                Menu
+              </a>
             </li>
             <li>
-              <a href="/blogs" className="hover:text-gray-300 transition-colors duration-300 text-white text-lg">Blogs</a>
+              <a
+                href="/blogs"
+                className="hover:text-gray-300 transition-colors duration-300 text-white text-lg"
+              >
+                Blogs
+              </a>
             </li>
           </ul>
         </div>
@@ -95,33 +115,30 @@ const Footer = () => {
 
       {/* Leaflet Map */}
       <div className="bg-yellow-500 pt-8 pb-8 mx-0">
-  <div className="container mx-auto px-0">
-    <div className="h-64 w-full overflow-hidden">
-      <MapContainer
-        center={[latitude, longitude]}
-        zoom={13}
-        className="h-full w-full"
-        scrollWheelZoom={false} // Disable scroll zoom
-        touchZoom="center" // Require two fingers for zoom on mobile
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <Marker 
-          position={[latitude, longitude]}
-          eventHandlers={{
-            click: () => openGoogleMaps(), // Open Google Maps on marker click
-          }}
-        >
-          <Popup>
-            Here we are <br /> Irtazafoods.
-          </Popup>
-        </Marker>
-      </MapContainer>
-    </div>
-  </div>
-</div>
-
+        <div className="container mx-auto px-0">
+          <div className="h-64 w-full overflow-hidden">
+            <MapContainer
+              center={[latitude, longitude]}
+              zoom={13}
+              className="h-full w-full"
+              scrollWheelZoom={false} // Disable scroll zoom
+              touchZoom="center" // Require two fingers for zoom on mobile
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker
+                position={[latitude, longitude]}
+                eventHandlers={{
+                  click: () => openGoogleMaps(), // Open Google Maps on marker click
+                }}
+              >
+                <Popup>
+                  Here we are <br /> Irtazafoods.
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
+        </div>
+      </div>
 
       {/* Footer Bottom */}
       <div className="bg-yellow-500 text-black py-4 text-center">
@@ -160,9 +177,7 @@ const Footer = () => {
         <p className="text-sm text-black">
           &copy; 2024 Irtazafoods. All rights reserved.
         </p>
-        <p className="text-sm text-black mt-2">
-          Designed by Ayaan Ahmad
-        </p>
+        <p className="text-sm text-black mt-2">Designed by Ayaan Ahmad</p>
       </div>
     </footer>
   );

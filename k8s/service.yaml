@@ -1,0 +1,43 @@
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: irtazafoods-db
+  namespace: irtazafoods
+spec:
+  selector:
+    app: irtazafoods-db
+  ports:
+  - port: 27017
+    targetPort: 27017
+  type: ClusterIP
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: irtazafoods-backend
+  namespace: irtazafoods
+spec:
+  selector:
+    app: irtazafoods-backend
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: irtazafoods-frontend
+  namespace: irtazafoods
+spec:
+  selector:
+    app: irtazafoods-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
+
