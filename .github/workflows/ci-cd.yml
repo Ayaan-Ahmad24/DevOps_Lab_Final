@@ -92,7 +92,7 @@ jobs:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && secrets.DOCKER_HUB_USERNAME != '' && secrets.DOCKER_HUB_TOKEN != ''
 
     strategy:
       matrix:
@@ -119,17 +119,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        continue-on-error: false
 
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
@@ -141,8 +139,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}:buildcache
-          cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}:buildcache,mode=max
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/irtazafoods-${{ matrix.service.name }}:buildcache,mode=max
 
   # Stage 4: Deployment
   deploy:
