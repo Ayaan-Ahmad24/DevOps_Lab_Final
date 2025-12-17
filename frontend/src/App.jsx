@@ -1,5 +1,4 @@
 // src/App.jsx
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -21,6 +20,7 @@ import SingleBlogPage from "./Components/blogpage";
 import SearchPage from "./pages/searchpage";
 import PrivateRoute from "./Components/PrivateRoutes"; // Import PrivateRoute
 import ContactUs from "./pages/ContactUs"
+import PropTypes from "prop-types";
 
 // Create a QueryClient instance
 const queryClient = new QueryClient();
@@ -33,6 +33,10 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
+PublicLayout.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 const AdminLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen bg-gray-50">
     <Header /> 
@@ -40,6 +44,10 @@ const AdminLayout = ({ children }) => (
     <Footer />
   </div>
 );
+
+AdminLayout.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 const App = () => {
   return (

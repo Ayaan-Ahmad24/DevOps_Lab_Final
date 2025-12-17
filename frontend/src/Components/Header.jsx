@@ -1,5 +1,5 @@
 // Import necessary libraries and styles
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaSearch, FaUserCircle } from "react-icons/fa";
 import "../index.css"; // Ensure Tailwind CSS is correctly imported

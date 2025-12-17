@@ -2,6 +2,8 @@ const Admin = require('../models/adminModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+// changing
+
 const register = async (req, res) => {
     const { UserName, Password, Email } = req.body;
 

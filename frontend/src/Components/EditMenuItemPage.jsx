@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import SidePanel from "./Sidepanel";
@@ -28,9 +28,10 @@ const EditMenuItemPage = () => {
           setImage(response.data.image || "");
         }
         setLoading(false);
-      } catch (error) {
+      } catch (err) {
         setError("Error fetching menu item");
         setLoading(false);
+        console.error("Error fetching menu item:", err);
       }
     };
     fetchMenuItem();
@@ -46,8 +47,9 @@ const EditMenuItemPage = () => {
         image,
       });
       navigate(`/admin/dashboard`);
-    } catch (error) {
+    } catch (err) {
       setError("Error updating menu item");
+      console.error("Error updating menu item:", err);
     }
   };
 

@@ -4,7 +4,6 @@ import "leaflet/dist/leaflet.css";
 import {
   FaFacebookF,
   FaInstagram,
-  FaTwitter,
   FaWhatsapp,
   FaYoutube,
   FaTiktok,

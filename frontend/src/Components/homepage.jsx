@@ -12,7 +12,7 @@ const HomePage = () => {
   const [blogs, setBlogs] = useState([]);
   const [isLoadingMenu, setIsLoadingMenu] = useState(true);
   const [isLoadingBlogs, setIsLoadingBlogs] = useState(true);
-  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [showAllProducts] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0); // For loading bar
   const navigate = useNavigate(); // Updated hook
 

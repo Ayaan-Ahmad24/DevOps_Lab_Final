@@ -16,7 +16,7 @@ const AddMenuItemPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_URL}/api/menu/add`,
         {
           name,
@@ -25,6 +25,7 @@ const AddMenuItemPage = () => {
           image,
         }
       );
+      navigate("/admin/dashboard");
 
       alert("Menu item added successfully");
       // Removed automatic redirect to /menulist after adding item

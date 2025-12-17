@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const SearchComponent = () => {
@@ -35,8 +35,9 @@ const SearchComponent = () => {
           } else {
             throw new Error("Network response was not ok");
           }
-        } catch (error) {
+        } catch (err) {
           setError("Failed to fetch search results");
+          console.error("Search error:", err);
         } finally {
           setLoading(false);
         }
