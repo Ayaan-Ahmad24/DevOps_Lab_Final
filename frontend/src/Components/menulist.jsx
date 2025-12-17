@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../index.css"; // Ensure this file contains your Tailwind and other styles
+import { getApiUrl } from "../utils/api";
 
 const MenuPage = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -10,7 +11,7 @@ const MenuPage = () => {
     const fetchMenuItems = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/menu/get`
+          getApiUrl('/api/menu/get')
         );
         if (Array.isArray(response.data)) {
           setMenuItems(response.data);

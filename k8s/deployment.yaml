@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-mongo-db:latest
+        image: docker.io/ayaanahmad25/irtazafoods-mongo-db:latest
         ports:
         - containerPort: 27017
         resources:
@@ -69,7 +69,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-backend:latest
+        image: docker.io/ayaanahmad25/irtazafoods-backend:latest
         ports:
         - containerPort: 5000
         resources:
@@ -81,7 +81,7 @@ spec:
             cpu: "500m"
         env:
         - name: MONGO_URI
-          value: "mongodb://irtazafoods-db:27017/irtazafoods"
+          value: "mongodb+srv://ayaanahmadnew2023:fh4wyGWv2nY2ZO4e@cluster0.e8ilc.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0"
         - name: PORT
           value: "5000"
         - name: FRONTEND_URL
@@ -117,7 +117,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-frontend:latest
+        image: docker.io/ayaanahmad25/irtazafoods-frontend:latest
         ports:
         - containerPort: 80
         resources:
@@ -139,4 +139,13 @@ spec:
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 5
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+
+
 

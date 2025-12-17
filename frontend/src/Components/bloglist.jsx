@@ -3,6 +3,7 @@ import axios from "axios";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { getApiUrl } from "../utils/api";
 
 const BlogListPage = () => {
   const [blogs, setBlogs] = useState([]);
@@ -17,7 +18,7 @@ const BlogListPage = () => {
     const fetchBlogs = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/blog/get-blog`
+          getApiUrl('/api/blog/get-blog')
         );
         if (Array.isArray(response.data)) {
           setBlogs(response.data);

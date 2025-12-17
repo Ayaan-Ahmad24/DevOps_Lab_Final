@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { getApiUrl } from "../utils/api";
 
 const SearchComponent = () => {
   const [results, setResults] = useState([]);
@@ -26,7 +27,7 @@ const SearchComponent = () => {
 
         try {
           const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/search?query=${submittedQuery}`
+            `${getApiUrl('/api/search')}?query=${submittedQuery}`
           );
 
           if (response.ok) {

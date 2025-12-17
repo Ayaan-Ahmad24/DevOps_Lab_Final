@@ -6,6 +6,7 @@ import "../index.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useNavigate } from "react-router-dom"; // Updated import
+import { getApiUrl } from "../utils/api";
 
 const HomePage = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -26,7 +27,7 @@ const HomePage = () => {
       setLoadingProgress(20); // Start loading progress
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/menu/get`
+          getApiUrl('/api/menu/get')
         );
         if (Array.isArray(response.data)) {
           setMenuItems(response.data);
@@ -52,7 +53,7 @@ const HomePage = () => {
       setLoadingProgress(40); // Start loading progress for blogs
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/blog/get-blog`
+          getApiUrl('/api/blog/get-blog')
         );
         if (Array.isArray(response.data)) {
           setBlogs(response.data);
