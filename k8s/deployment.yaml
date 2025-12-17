@@ -17,12 +17,35 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-mongo-db:latest
+        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-mongo-db:latest
         ports:
         - containerPort: 27017
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db
+        livenessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --eval
+            - "db.adminCommand('ping')"
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
       - name: mongo-data
         persistentVolumeClaim:
@@ -46,9 +69,16 @@ spec:
     spec:
       containers:
       - name: backend
-        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-backend:latest
+        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-backend:latest
         ports:
         - containerPort: 5000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
         env:
         - name: MONGO_URI
           value: "mongodb://irtazafoods-db:27017/irtazafoods"
@@ -56,6 +86,18 @@ spec:
           value: "5000"
         - name: FRONTEND_URL
           value: "http://irtazafoods-frontend"
+        livenessProbe:
+          httpGet:
+            path: /api/menu/get
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/menu/get
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
 ---
 # Frontend Deployment
 apiVersion: apps/v1
@@ -75,7 +117,26 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: docker.io/$DOCKER_HUB_USERNAME/irtazafoods-frontend:latest
+        image: docker.io/YOUR_DOCKERHUB_USERNAME/irtazafoods-frontend:latest
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
 
