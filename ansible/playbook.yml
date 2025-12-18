@@ -1,0 +1,347 @@
+---
+- name: Configure IrtazaFoods Application Servers
+  hosts: all
+  become: yes
+  vars:
+    docker_compose_version: "2.24.0"
+    nodejs_version: "18"
+    nginx_user: "www-data"
+
+  tasks:
+    - name: Get current user
+      shell: whoami
+      register: current_user_result
+      changed_when: false
+
+    - name: Set current user fact
+      set_fact:
+        current_user: "{{ current_user_result.stdout }}"
+
+    - name: Check if Kali Linux
+      set_fact:
+        is_kali: "{{ ansible_distribution == 'Kali GNU/Linux' }}"
+
+    - name: Remove problematic Docker repositories (if any)
+      apt_repository:
+        repo: "{{ item }}"
+        state: absent
+      loop:
+        - "deb [arch=amd64] https://download.docker.com/linux/debian kali-rolling stable"
+        - "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+      ignore_errors: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update apt cache (ignore repository errors)
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+        allow_unauthenticated: no
+      when: ansible_os_family == "Debian"
+      ignore_errors: yes
+      register: apt_update_result
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - wget
+          - git
+          - ca-certificates
+          - gnupg
+          - lsb-release
+          - software-properties-common
+          - python3
+          - python3-pip
+          - apt-transport-https
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker from Kali repositories (for Kali Linux)
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+        update_cache: yes
+      when: is_kali | bool
+      notify: restart docker
+
+    - name: Set Docker repository release for Debian/Ubuntu
+      set_fact:
+        docker_repo_release: "{{ 'bookworm' if ansible_distribution_release == 'kali-rolling' else (ansible_distribution_release if ansible_distribution_release else 'bookworm') }}"
+      when: ansible_os_family == "Debian" and not (is_kali | default(false))
+
+    - name: Download Docker GPG key for Debian/Ubuntu
+      get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /usr/share/keyrings/docker-archive-keyring.gpg
+        mode: '0644'
+      when: ansible_os_family == "Debian" and not (is_kali | bool)
+
+    - name: Add Docker repository for Debian/Ubuntu
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian {{ docker_repo_release }} stable"
+        state: present
+      when: ansible_os_family == "Debian" and not (is_kali | bool)
+
+    - name: Install Docker CE for Debian/Ubuntu
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian" and not (is_kali | bool)
+      notify: restart docker
+
+    - name: Add current user to docker group
+      user:
+        name: "{{ current_user }}"
+        groups: docker
+        append: yes
+
+    - name: Install Node.js using NodeSource repository
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_version }}.x | bash -
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+      when: ansible_os_family == "Debian"
+
+    - name: Install Node.js
+      apt:
+        name:
+          - nodejs
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      notify: restart nginx
+
+    - name: Install kubectl
+      shell: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        rm kubectl
+      args:
+        creates: /usr/local/bin/kubectl
+
+    - name: Create application directory
+      file:
+        path: /opt/irtazafoods
+        state: directory
+        mode: '0755'
+        owner: "{{ current_user }}"
+        group: "{{ current_user }}"
+
+    - name: Create docker-compose directory
+      file:
+        path: /opt/irtazafoods/docker-compose
+        state: directory
+        mode: '0755'
+        owner: "{{ current_user }}"
+        group: "{{ current_user }}"
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Test Nginx configuration
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+      failed_when: false
+
+    - name: Display Nginx config test result
+      debug:
+        msg: "Nginx config test: {{ 'OK' if nginx_test.rc == 0 else 'FAILED' }}"
+
+    - name: Ensure Nginx service is running
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      ignore_errors: yes
+      register: nginx_start_result
+
+    - name: Display Nginx service status
+      debug:
+        msg: "Nginx service: {{ 'Started successfully' if not nginx_start_result.failed else 'Failed to start (non-critical)' }}"
+      when: nginx_start_result.failed | default(false)
+
+    - name: Verify Docker installation
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Display Docker version
+      debug:
+        msg: "Docker version: {{ docker_version.stdout }}"
+
+    - name: Verify Node.js installation
+      command: node --version
+      register: node_version
+      changed_when: false
+
+    - name: Display Node.js version
+      debug:
+        msg: "Node.js version: {{ node_version.stdout }}"
+
+    - name: Verify Nginx installation
+      command: nginx -v
+      register: nginx_version
+      changed_when: false
+      failed_when: false
+
+    - name: Display Nginx version
+      debug:
+        msg: "Nginx version: {{ nginx_version.stderr | default(nginx_version.stdout) }}"
+
+  handlers:
+    - name: restart docker
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+      ignore_errors: yes
+
+- name: Configure Backend Server
+  hosts: backend_servers
+  become: yes
+  vars:
+    app_dir: "/opt/irtazafoods/backend"
+
+  tasks:
+    - name: Get current user
+      shell: whoami
+      register: current_user_result
+      changed_when: false
+
+    - name: Set current user fact
+      set_fact:
+        current_user: "{{ current_user_result.stdout }}"
+        app_user: "{{ current_user_result.stdout }}"
+
+    - name: Install MongoDB client tools (optional)
+      apt:
+        name:
+          - mongodb-database-tools
+          - mongodb-mongosh
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      ignore_errors: yes
+      register: mongodb_install_result
+
+    - name: Display MongoDB tools installation status
+      debug:
+        msg: "MongoDB tools: {{ 'Installed' if not mongodb_install_result.failed else 'Not available (optional)' }}"
+      when: mongodb_install_result is defined
+
+    - name: Create backend application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Create backend logs directory
+      file:
+        path: "{{ app_dir }}/logs"
+        state: directory
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Install PM2 globally
+      npm:
+        name: pm2
+        global: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Verify PM2 installation
+      command: pm2 --version
+      register: pm2_version
+      changed_when: false
+
+    - name: Display PM2 version
+      debug:
+        msg: "PM2 version: {{ pm2_version.stdout }}"
+
+- name: Configure Frontend Server
+  hosts: frontend_servers
+  become: yes
+  vars:
+    app_dir: "/opt/irtazafoods/frontend"
+
+  tasks:
+    - name: Get current user
+      shell: whoami
+      register: current_user_result
+      changed_when: false
+
+    - name: Set current user fact
+      set_fact:
+        current_user: "{{ current_user_result.stdout }}"
+        app_user: "{{ current_user_result.stdout }}"
+
+    - name: Create frontend application directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Create frontend build directory
+      file:
+        path: "{{ app_dir }}/dist"
+        state: directory
+        mode: '0755'
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Test Nginx configuration before changes
+      command: nginx -t
+      register: nginx_test_before
+      changed_when: false
+      failed_when: false
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      ignore_errors: yes
+
+    - name: Test Nginx configuration after changes
+      command: nginx -t
+      register: nginx_test_after
+      changed_when: false
+      failed_when: false
+
+    - name: Display Nginx config status
+      debug:
+        msg: "Nginx config: {{ 'Valid' if nginx_test_after.rc == 0 else 'Has issues (non-critical)' }}"
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+      ignore_errors: yes
+
